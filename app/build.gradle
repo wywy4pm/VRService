@@ -1,0 +1,49 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    compileSdkVersion 30
+
+    defaultConfig {
+        applicationId "com.vr.service"
+        minSdkVersion 27
+        targetSdkVersion 30
+        versionCode 2
+        versionName "1.1"
+    }
+
+    packagingOptions {
+
+        exclude'META-INF/INDEX.LIST'
+        exclude'META-INF/io.netty.versions.properties'
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    android.applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def releaseTime = new Date().format("yyyy-MM-dd")
+            outputFileName = "VRService_V${defaultConfig.versionName}_${releaseTime}_${buildType.name}.apk"
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.google.android.material:material:1.2.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+    implementation 'com.github.jiusetian:EasySocket:2.1.1'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'com.picoxr.tobservice:tobservicelib:4.3.6.1'
+}

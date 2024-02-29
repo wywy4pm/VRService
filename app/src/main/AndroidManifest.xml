@@ -54,7 +54,10 @@
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="mediaProjection"
-            android:label="VRService" />
+            android:label="VRService">
+            <action android:name="com.pvr.tobservice.SERVICE_AUTO_BOOT" />
+            <category android:name="android.intent.category.DEFAULT" />
+        </service>
     </application>
 
 </manifest>

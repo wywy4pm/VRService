@@ -9,8 +9,8 @@ android {
         applicationId "com.vr.service"
         minSdkVersion 27
         targetSdkVersion 30
-        versionCode 2
-        versionName "1.1"
+        versionCode 4
+        versionName "1.4"
     }
 
     packagingOptions {

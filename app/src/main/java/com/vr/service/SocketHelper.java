@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.easysocket.EasySocket;
+import com.easysocket.config.DefaultMessageProtocol;
 import com.easysocket.config.EasySocketOptions;
 import com.easysocket.entity.OriginReadData;
 import com.easysocket.entity.SocketAddress;
@@ -56,8 +57,7 @@ public class SocketHelper {
             super.onSocketConnSuccess(socketAddress);
             Log.d(TAG, "onSocketConnSuccess");
             MessageData messageData = Utils.getCommonMessageData(context);
-            String message = new GsonBuilder().create().toJson(messageData);
-            sendMessage(message);
+            sendMessage(messageData);
         }
 
         /**
@@ -98,9 +98,9 @@ public class SocketHelper {
     /**
      * 发送一个的消息，
      */
-    public void sendMessage(String message) {
+    public void sendMessage(MessageData messageData) {
         //发送
-        EasySocket.getInstance().upMessage(message.getBytes());
+        EasySocket.getInstance().upMessage(messageData.pack());
     }
 
     public void connect() {
@@ -127,6 +127,8 @@ public class SocketHelper {
                         socketListener.openApp(messageData.openAppPkgName);
                     } else if (messageData.vrMsgType == MessageData.MSG_TYPE_SCREEN_OUT) {
                         socketListener.startScreen();
+                    } else if (messageData.vrMsgType == MessageData.MSG_TYPE_SCREEN_OUT_STOP) {
+                        socketListener.stopScreen();
                     }
                 }
             } catch (Exception e) {

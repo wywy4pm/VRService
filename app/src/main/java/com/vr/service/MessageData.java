@@ -1,5 +1,9 @@
 package com.vr.service;
 
+import com.google.gson.Gson;
+
+import java.nio.ByteBuffer;
+
 public class MessageData {
     public static final String TAG_ANDROID = "vr-android";
     public String Tag;
@@ -10,6 +14,7 @@ public class MessageData {
     public String imageBase64Data;
     public static final int MSG_TYPE_CLOSE_APP = 1;
     public static final int MSG_TYPE_SCREEN_OUT = 2;
+    public static final int MSG_TYPE_SCREEN_OUT_STOP = 3;
 
     public MessageData(String tag, String IP, String devSN) {
         Tag = tag;
@@ -22,5 +27,14 @@ public class MessageData {
         this.IP = IP;
         DevSN = devSN;
         this.imageBase64Data = imageBase64Data;
+    }
+
+    public byte[] pack() {
+
+        byte[] body = new Gson().toJson(this).getBytes();
+        ByteBuffer bb = ByteBuffer.allocate(body.length + 4);
+        bb.putInt(body.length);
+        bb.put(body);
+        return bb.array();
     }
 }

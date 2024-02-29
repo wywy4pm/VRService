@@ -49,14 +49,21 @@
             <!-- </intent-filter> -->
         </activity>
 
+        <meta-data
+            android:name="pico_advance_interface"
+            android:value="0"/>
+
         <service
             android:name=".VRService"
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="mediaProjection"
             android:label="VRService">
-            <action android:name="com.pvr.tobservice.SERVICE_AUTO_BOOT" />
-            <category android:name="android.intent.category.DEFAULT" />
+            <intent-filter>
+                <!--Service中配置此Action，行业设置启动的时候会启动带这个Action的Service-->
+                <action android:name="com.pvr.tobservice.SERVICE_AUTO_BOOT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </service>
     </application>
 

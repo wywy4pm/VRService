@@ -3,6 +3,7 @@ package com.vr.service;
 import com.google.gson.Gson;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 public class MessageData {
     public static final String TAG_ANDROID = "vr-android";
@@ -33,6 +34,7 @@ public class MessageData {
 
         byte[] body = new Gson().toJson(this).getBytes();
         ByteBuffer bb = ByteBuffer.allocate(body.length + 4);
+        bb.order(ByteOrder.LITTLE_ENDIAN);
         bb.putInt(body.length);
         bb.put(body);
         return bb.array();

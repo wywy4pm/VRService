@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
+import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
 public class SocketHelper {
@@ -36,7 +37,8 @@ public class SocketHelper {
         EasySocketOptions options = new EasySocketOptions.Builder()
                 .setSocketAddress(new SocketAddress(ipAddress, TextUtils.isEmpty(port) ? 8889 : Integer.parseInt(port))) //主机地址
                 // 强烈建议定义一个消息协议，方便解决 socket黏包、分包的问题
-//                .setReaderProtocol(new DefaultMessageProtocol()) // 默认的消息协议
+                .setReaderProtocol(new DefaultMessageProtocol()) // 默认的消息协议
+                .setReadOrder(ByteOrder.LITTLE_ENDIAN)
                 .build();
         //初始化EasySocket
         EasySocket.getInstance().createConnection(options, context);

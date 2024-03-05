@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
@@ -58,8 +59,8 @@ public class SocketHelper {
         public void onSocketConnSuccess(SocketAddress socketAddress) {
             super.onSocketConnSuccess(socketAddress);
             Log.d(TAG, "onSocketConnSuccess");
-            MessageData messageData = Utils.getCommonMessageData(context);
-            sendMessage(messageData);
+//            MessageData messageData = Utils.getCommonMessageData(context);
+//            sendMessage(messageData);
         }
 
         /**
@@ -102,7 +103,31 @@ public class SocketHelper {
      */
     public void sendMessage(MessageData messageData) {
         //发送
+        byte[] data = messageData.pack();
+        Log.d(TAG,"sendMessage data = " + new String(data));
         EasySocket.getInstance().upMessage(messageData.pack());
+    }
+
+    public void sendMessage(byte[] body) {
+        //发送
+        byte[] data = pack(body);
+//        Log.d(TAG,"sendMessage data = " + data[0] + ":" + data[1] + ":" + data[2] + ":" + data[3]);
+        EasySocket.getInstance().upMessage(data);
+    }
+
+    public byte[] pack(byte[] body) {
+        ByteBuffer buffer = ByteBuffer.allocate(4);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        buffer.putInt(100);
+        buffer.flip();
+        byte[] bytes = new byte[buffer.remaining()];
+        buffer.get(bytes);
+//        Log.d(TAG,"pack data = " + bytes[0] + ":" + bytes[1] + ":" + bytes[2] + ":" + bytes[3]);
+        body[0] = bytes[0];
+        body[1] = bytes[1];
+        body[2] = bytes[2];
+        body[3] = bytes[3];
+        return body;
     }
 
     public void connect() {

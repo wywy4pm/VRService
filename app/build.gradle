@@ -9,8 +9,8 @@ android {
         applicationId "com.vr.service"
         minSdkVersion 27
         targetSdkVersion 30
-        versionCode 4
-        versionName "1.4"
+        versionCode 5
+        versionName "1.5"
     }
 
     packagingOptions {
@@ -43,7 +43,8 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
-    implementation 'com.github.jiusetian:EasySocket:2.1.1'
+//    implementation 'com.github.jiusetian:EasySocket:2.1.1'
+    implementation project(":easysocket")
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'com.picoxr.tobservice:tobservicelib:4.3.6.1'
 }

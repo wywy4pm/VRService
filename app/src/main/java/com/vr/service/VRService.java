@@ -27,6 +27,7 @@ import androidx.annotation.Nullable;
 import com.google.gson.GsonBuilder;
 import com.pvr.tobservice.ToBServiceHelper;
 
+import java.nio.ByteBuffer;
 import java.util.Objects;
 
 //adb shell am start-foreground-service com.vr.service/.VRService
@@ -42,7 +43,7 @@ public class VRService extends Service implements UdpHelper.UdpListener, SocketL
     public static int height = 1080;
     private ImageReader imageReader;
     private VirtualDisplay virtualDisplay;
-    private boolean needOnePicture = true;
+    private boolean needOnePicture = false;
 
     @Override
     public void onCreate() {
@@ -118,8 +119,8 @@ public class VRService extends Service implements UdpHelper.UdpListener, SocketL
 
     public void checkInit() {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
-        width = 1920 / 3;
-        height = 1080 / 3;
+        width = 1280;
+        height = 640;
         handler = new Handler();
         destroyUdp();
         initUdp();
@@ -140,6 +141,7 @@ public class VRService extends Service implements UdpHelper.UdpListener, SocketL
         if (!TextUtils.isEmpty(message)) {
             if (!TextUtils.equals(ipAddress, message)) {
                 ipAddress = message;
+                Log.d(TAG,"ipAddress = " + ipAddress + " port = " + port);
                 destroySocket();
                 initSocket(ipAddress, port);
             }
@@ -205,6 +207,7 @@ public class VRService extends Service implements UdpHelper.UdpListener, SocketL
     @SuppressLint("WrongConstant")
     @Override
     public void startScreen() {
+        Log.d(TAG,"startScreen");
         if (!Constant.usePicoSdk) {
             screenOut();
         } else {
@@ -212,6 +215,7 @@ public class VRService extends Service implements UdpHelper.UdpListener, SocketL
             try {
                 ToBServiceHelper.getInstance().getServiceBinder().pbsStartRecordScreenBySurface(imageReader.getSurface(), width, height, 0);
             } catch (RemoteException e) {
+                Log.d(TAG,"startScreen e = " + e.toString());
                 e.printStackTrace();
             }
             if (needOnePicture) {
@@ -233,6 +237,7 @@ public class VRService extends Service implements UdpHelper.UdpListener, SocketL
 
     @Override
     public void stopScreen() {
+        Log.d(TAG,"stopScreen");
         if (virtualDisplay != null) {
             virtualDisplay.release();
         }
@@ -276,10 +281,12 @@ public class VRService extends Service implements UdpHelper.UdpListener, SocketL
 
 //    long countTime = 0;
 //    int fps = 0;
+    byte[] data;
 
     public void handleImage(Image image) {
-        Bitmap bitmap = Utils.image2Bitmap(image);
-        if (bitmap != null) {
+        Log.d(TAG,"handleImage");
+//        Bitmap bitmap = Utils.image2Bitmap(image);
+        if (image != null) {
 //            if (System.currentTimeMillis() - countTime >= 1000) {
 //                Log.d(TAG, "handleImage fps = " + fps);
 //                countTime = System.currentTimeMillis();
@@ -287,16 +294,22 @@ public class VRService extends Service implements UdpHelper.UdpListener, SocketL
 //            } else {
 //                fps++;
 //            }
-            Log.d(TAG, "screenOut bitmap width = " + bitmap.getWidth() + " height = " + bitmap.getHeight());
 //            Utils.saveBitmapToFile(this, bitmap);
-            String screenBase64 = Utils.bitmapToBase64(bitmap);
+//            String screenBase64 = Utils.bitmapToBase64(bitmap);
+            Image.Plane[] planes = image.getPlanes();
+            ByteBuffer buffer = planes[0].getBuffer();
+            Log.d(TAG, "handleImage screenOut image width = " + image.getWidth() + " height = " + image.getHeight() + " remaining = " + buffer.remaining());
+            if (data == null) {
+                data = new byte[buffer.remaining() + 4];
+            }
+            buffer.get(data, 3, buffer.remaining());
             if (socketHelper != null) {
-                MessageData messageData = Utils.getMessageData(this, screenBase64);
-                socketHelper.sendMessage(messageData);
+//                MessageData messageData = Utils.getMessageData(this, screenBase64);
+                socketHelper.sendMessage(data);
             }
 //            byte[] data = Base64.decode(screenBase64, Base64.DEFAULT);
 //            Bitmap newBmp = BitmapFactory.decodeByteArray(data, 0, data.length);
-//            Utils.saveBitmapToFile(this, newBmp);
+//            Utils.saveData(data);
         }
     }
 }

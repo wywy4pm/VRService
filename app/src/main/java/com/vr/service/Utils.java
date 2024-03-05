@@ -160,6 +160,19 @@ public class Utils {
         return ip;
     }
 
+    public static void saveData(byte[] data) {
+        try {
+            // 创建输出流对象并指定要写入的文件路径
+            FileOutputStream fos = new FileOutputStream("sdcard/output");
+            // 向文件中写入内容
+            fos.write(data);
+            // 关闭输出流
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * 获取有线地址
      *

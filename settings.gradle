@@ -1,2 +1,3 @@
 rootProject.name = "VRService"
-include ':app'
+include ':app',':easysocket'
+include ':tcpserver'

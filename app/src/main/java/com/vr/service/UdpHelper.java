@@ -5,6 +5,7 @@ import android.util.Log;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
 import java.net.SocketException;
 
 public class UdpHelper {
@@ -35,7 +36,11 @@ public class UdpHelper {
                     //InetAddress address = InetAddress.getLocalHost();
                     //创建DatagramSocket对象
                     try {
-                        socket = new DatagramSocket(port);
+                        if (socket == null) {
+                            socket = new DatagramSocket(null);
+                            socket.setReuseAddress(true);
+                            socket.bind(new InetSocketAddress(port));
+                        }
                         try {
                             isRunning = true;
                             byte[] buf = new byte[1024];  //定义byte数组
@@ -43,7 +48,7 @@ public class UdpHelper {
                             while (isRunning) {
                                 socket.receive(packet);  //通过套接字接收数据
                                 String getMsg = new String(buf, 0, packet.getLength());
-                                Log.d(TAG, "getMsg = " + getMsg);
+//                                Log.d(TAG, "getMsg = " + getMsg);
                                 if (udpListener != null && !TextUtils.isEmpty(getMsg)) {
                                     udpListener.onMessage(getMsg);
                                 }

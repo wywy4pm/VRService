@@ -59,8 +59,8 @@ public class SocketHelper {
         public void onSocketConnSuccess(SocketAddress socketAddress) {
             super.onSocketConnSuccess(socketAddress);
             Log.d(TAG, "onSocketConnSuccess");
-//            MessageData messageData = Utils.getCommonMessageData(context);
-//            sendMessage(messageData);
+            MessageData messageData = Utils.getCommonMessageData(context);
+            sendMessage(messageData);
         }
 
         /**
@@ -156,6 +156,16 @@ public class SocketHelper {
                         socketListener.startScreen();
                     } else if (messageData.vrMsgType == MessageData.MSG_TYPE_SCREEN_OUT_STOP) {
                         socketListener.stopScreen();
+                    } else if (messageData.vrMsgType == MessageData.MSG_TYPE_SHUTDOWN) {
+                        socketListener.shutDownAndReBoot(false);
+                    } else if (messageData.vrMsgType == MessageData.MSG_TYPE_REBOOT) {
+                        socketListener.shutDownAndReBoot(true);
+                    } else if (messageData.vrMsgType == MessageData.MSG_TYPE_VOLUME_SET) {
+                        socketListener.setVolume(messageData.volumeIndex);
+                    } else if (messageData.vrMsgType == MessageData.MSG_TYPE_FREEZE_SCREEN) {
+                        socketListener.setFreezeScreen(true);
+                    } else if (messageData.vrMsgType == MessageData.MSG_TYPE_FREEZE_SCREEN_CANCEL) {
+                        socketListener.setFreezeScreen(false);
                     }
                 }
             } catch (Exception e) {

@@ -13,14 +13,38 @@ public class MessageData {
     public int vrMsgType;
     public String openAppPkgName;
     public String imageBase64Data;
+    public String rtmpUrl;
+    public String normalUrl;
+    public int volumeIndex;
+    public int powerValue;
     public static final int MSG_TYPE_CLOSE_APP = 1;
     public static final int MSG_TYPE_SCREEN_OUT = 2;
     public static final int MSG_TYPE_SCREEN_OUT_STOP = 3;
+    public static final int MSG_TYPE_SHUTDOWN = 4;
+    public static final int MSG_TYPE_REBOOT = 5;
+    public static final int MSG_TYPE_VOLUME_SET = 6;
+    public static final int MSG_TYPE_FREEZE_SCREEN = 7;
+    public static final int MSG_TYPE_FREEZE_SCREEN_CANCEL = 8;
 
     public MessageData(String tag, String IP, String devSN) {
         Tag = tag;
         this.IP = IP;
         DevSN = devSN;
+    }
+
+    public MessageData(String tag, String IP, String devSN, String rtmpUrl, String normalUrl) {
+        Tag = tag;
+        this.IP = IP;
+        DevSN = devSN;
+        this.rtmpUrl = rtmpUrl;
+        this.normalUrl = normalUrl;
+    }
+
+    public MessageData(String tag, String IP, String devSN, int powerValue) {
+        Tag = tag;
+        this.IP = IP;
+        DevSN = devSN;
+        this.powerValue = powerValue;
     }
 
     public MessageData(String tag, String IP, String devSN, String imageBase64Data) {

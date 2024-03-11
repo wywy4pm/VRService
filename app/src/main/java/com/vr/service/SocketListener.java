@@ -6,4 +6,10 @@ public interface SocketListener {
     void startScreen();
 
     void stopScreen();
+
+    void shutDownAndReBoot(boolean isReboot);
+
+    void setVolume(int volumeIndex);
+
+    void setFreezeScreen(boolean freezeScreen);
 }

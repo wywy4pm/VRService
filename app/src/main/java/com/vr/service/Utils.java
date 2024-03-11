@@ -1,16 +1,25 @@
 package com.vr.service;
 
+import static com.vr.service.UdpHelper.TAG;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.AudioManager;
 import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.WifiInfo;
+import android.os.BatteryManager;
 import android.os.Environment;
+import android.os.RemoteException;
 import android.util.Base64;
 import android.util.Log;
+
+import com.pvr.tobservice.ToBServiceHelper;
+import com.pvr.tobservice.enums.PBS_DeviceControlEnum;
+import com.pvr.tobservice.interfaces.IIntCallback;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -45,6 +54,16 @@ public class Utils {
         bitmap.copyPixelsFromBuffer(buffer);
         image.close();
         return bitmap;
+    }
+
+    public static MessageData getMessageData(Context context, String rtmpUrl, String normalUrl) {
+        MessageData messageData = new MessageData(MessageData.TAG_ANDROID, getIP(context), Constant.deviceSN, rtmpUrl, normalUrl);
+        return messageData;
+    }
+
+    public static MessageData getMessageData(Context context, int powerValue) {
+        MessageData messageData = new MessageData(MessageData.TAG_ANDROID, getIP(context), Constant.deviceSN, powerValue);
+        return messageData;
     }
 
     public static MessageData getMessageData(Context context, String base64Data) {
@@ -220,5 +239,64 @@ public class Utils {
         }
         String mobileIp = addr.getHostAddress();
         return mobileIp;
+    }
+
+    public static void setVolumeIndex(Context context, int volumeIndex) {
+        Log.d(TAG, "setVolumeIndex volumeIndex = " + volumeIndex);
+        AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        if (audioManager != null) {
+            audioManager.setStreamVolume(AudioManager.STREAM_SYSTEM, volumeIndex, 0);
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volumeIndex, 0);
+        }
+    }
+
+    public static int getDevicePower(Context context) {
+        BatteryManager batteryManager = (BatteryManager) context.getSystemService(Context.BATTERY_SERVICE);
+        int curPower = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+        Log.d(TAG, "getDevicePower curPower = " + curPower);
+        return curPower;
+    }
+
+    public static void openApp(String pkgName) {
+        if (ToBServiceHelper.getInstance().getServiceBinder() == null) {
+            return;
+        }
+        try {
+            Log.d(TAG, "openApp pbsStartActivity pkgName = " + pkgName);
+            ToBServiceHelper.getInstance().getServiceBinder().pbsStartActivity(pkgName,"","","",null,new int[]{Intent.FLAG_ACTIVITY_NEW_TASK},0);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void rebootAndShutDown(boolean isReboot) {
+        if (ToBServiceHelper.getInstance().getServiceBinder() == null) {
+            return;
+        }
+        Log.d(TAG, "rebootAndShutDown isReboot = " + isReboot);
+        //重启
+        try {
+            PBS_DeviceControlEnum type = isReboot ? PBS_DeviceControlEnum.DEVICE_CONTROL_REBOOT : PBS_DeviceControlEnum.DEVICE_CONTROL_SHUTDOWN;
+            ToBServiceHelper.getInstance().getServiceBinder().pbsControlSetDeviceAction(type, new IIntCallback.Stub() {
+                @Override
+                public void callback(int result) throws RemoteException {
+                    Log.d(TAG, "rebootAndShutDown callback: " + result);
+                }
+            });
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void setFreezeScreen(boolean freezeScreen) {
+        if (ToBServiceHelper.getInstance().getServiceBinder() == null) {
+            return;
+        }
+        Log.d(TAG, "setFreezeScreen freezeScreen = " + freezeScreen);
+        try {
+            ToBServiceHelper.getInstance().getServiceBinder().pbsFreezeScreen(freezeScreen);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 }

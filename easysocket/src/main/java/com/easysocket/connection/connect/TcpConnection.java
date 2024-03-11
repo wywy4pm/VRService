@@ -138,4 +138,16 @@ public class TcpConnection extends SuperConnection {
         }
         return null;
     }
+
+    @Override
+    public int getLocalPort() {
+        if (socket != null && socket.isConnected() && !socket.isClosed()) {
+            try {
+                return socket.getLocalPort();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
+    }
 }

@@ -62,4 +62,5 @@ public interface IConnectionManager extends ISubscribeSocketAction, IOptions<ICo
     IHeartManager getHeartManager();
 
 
+    int getLocalPort();
 }

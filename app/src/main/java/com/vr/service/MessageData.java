@@ -17,6 +17,7 @@ public class MessageData {
     public String normalUrl;
     public int volumeIndex;
     public int powerValue;
+    public int localPort;
     public static final int MSG_TYPE_CLOSE_APP = 1;
     public static final int MSG_TYPE_SCREEN_OUT = 2;
     public static final int MSG_TYPE_SCREEN_OUT_STOP = 3;

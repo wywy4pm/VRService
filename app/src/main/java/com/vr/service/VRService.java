@@ -53,13 +53,23 @@ public class VRService extends Service implements UdpHelper.UdpListener, SocketL
     private boolean needOnePicture = false;
     private Timer timer;
     private TimerTask timerTask;
+    private boolean isInit = false;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate");
         if (Constant.usePicoSdk) {
-            ToBServiceHelper.getInstance().bindTobService(this);
+            Log.d(TAG,"ToBServiceHelper bindTobService");
+            ToBServiceHelper.getInstance().bindTobService(this, new ToBServiceHelper.BindCallBack() {
+                @Override
+                public void bindCallBack(Boolean status) {
+                    Log.d(TAG,"ToBServiceHelper bindCallBack status = " + status);
+                    if (status) {
+                        checkInit();
+                    }
+                }
+            });
         } else {
             Intent intent = new Intent(this, MediaProjectionActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -91,7 +101,7 @@ public class VRService extends Service implements UdpHelper.UdpListener, SocketL
                 checkInit();
             }
         } else {
-            checkInit();
+//            checkInit();
         }
         return START_STICKY;
     }
@@ -127,9 +137,13 @@ public class VRService extends Service implements UdpHelper.UdpListener, SocketL
     }
 
     public void checkInit() {
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
-        width = 1280;
-        height = 640;
+        Log.d(TAG,"checkInit isInit = " + isInit);
+        if (isInit) {
+            return;
+        }
+//        DisplayMetrics metrics = getResources().getDisplayMetrics();
+//        width = 1280;
+//        height = 640;
         handler = new Handler();
         destroyUdp();
         initUdp();
@@ -137,13 +151,10 @@ public class VRService extends Service implements UdpHelper.UdpListener, SocketL
             destroySocket();
             initSocket(ipAddress, port);
         }
-        Constant.deviceSN = Utils.readFromSD(Utils.SN_FILE);
+        Utils.keepServiceAlive();
+        Constant.deviceSN = Utils.getDeviceSN();
         startTimerTask();
-//        try {
-//            ToBServiceHelper.getInstance().getServiceBinder().pbsAppKeepAlive(BuildConfig.APPLICATION_ID,true,0);
-//        } catch (RemoteException e) {
-//            e.printStackTrace();
-//        }
+        isInit = true;
     }
 
     @Override
@@ -196,6 +207,7 @@ public class VRService extends Service implements UdpHelper.UdpListener, SocketL
         }
         stopScreen();
         cancelTimer();
+        isInit = false;
     }
 
     @Override
@@ -244,10 +256,10 @@ public class VRService extends Service implements UdpHelper.UdpListener, SocketL
                 return;
             }
             try {
-                ToBServiceHelper.getInstance().getServiceBinder().pbsPicoCastInit(new IIntCallback() {
+                int result = ToBServiceHelper.getInstance().getServiceBinder().pbsPicoCastInit(new IIntCallback() {
                     @Override
-                    public void callback(int i) throws RemoteException {
-                        Log.d(TAG,"startScreen pbsPicoCastInit callback i = " + i);
+                    public void callback(int result) throws RemoteException {
+                        Log.d(TAG,"startScreen pbsPicoCastInit callback result = " + result);
                     }
 
                     @Override
@@ -255,7 +267,9 @@ public class VRService extends Service implements UdpHelper.UdpListener, SocketL
                         return null;
                     }
                 },0);
-                ToBServiceHelper.getInstance().getServiceBinder().pbsPicoCastSetShowAuthorization(1, 0);
+                Log.d(TAG,"startScreen pbsPicoCastInit result = " + result);
+                int authorization = ToBServiceHelper.getInstance().getServiceBinder().pbsPicoCastSetShowAuthorization(1, 0);
+                Log.d(TAG,"startScreen pbsPicoCastSetShowAuthorization authorization = " + authorization);
                 String rtmpUrl = ToBServiceHelper.getInstance().getServiceBinder().pbsPicoCastGetUrl(PBS_PICOCastUrlTypeEnum.RTMP_URL, 0);
                 String normalUrl = ToBServiceHelper.getInstance().getServiceBinder().pbsPicoCastGetUrl(PBS_PICOCastUrlTypeEnum.NORMAL_URL, 0);
                 Log.d(TAG, "startScreen pbsPicoCastGetUrl rtmpUrl = " + rtmpUrl);
@@ -326,13 +340,13 @@ public class VRService extends Service implements UdpHelper.UdpListener, SocketL
                 sendPowerMsg();
             }
         };
-        timer.schedule(timerTask, 1000, 2 * 1000);
+        timer.schedule(timerTask, 1000, 60 * 1000);
         Log.d(TAG,"startTimerTask");
     }
 
     public void sendPowerMsg() {
         if (socketHelper != null) {
-            int power = Utils.getDevicePower(this);
+            int power = Utils.getPicoPower();
             MessageData messageData = Utils.getMessageData(this, power);
             socketHelper.sendMessage(messageData);
         }

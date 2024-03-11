@@ -17,8 +17,10 @@ import android.os.RemoteException;
 import android.util.Base64;
 import android.util.Log;
 
+import com.easysocket.EasySocket;
 import com.pvr.tobservice.ToBServiceHelper;
 import com.pvr.tobservice.enums.PBS_DeviceControlEnum;
+import com.pvr.tobservice.enums.PBS_SystemInfoEnum;
 import com.pvr.tobservice.interfaces.IIntCallback;
 
 import java.io.BufferedOutputStream;
@@ -58,11 +60,21 @@ public class Utils {
 
     public static MessageData getMessageData(Context context, String rtmpUrl, String normalUrl) {
         MessageData messageData = new MessageData(MessageData.TAG_ANDROID, getIP(context), Constant.deviceSN, rtmpUrl, normalUrl);
+        if (EasySocket.getInstance().getDefconnection() != null) {
+            int localPort = EasySocket.getInstance().getDefconnection().getLocalPort();
+            Log.d(TAG, "localPort = " + localPort);
+            messageData.localPort = localPort;
+        }
         return messageData;
     }
 
     public static MessageData getMessageData(Context context, int powerValue) {
         MessageData messageData = new MessageData(MessageData.TAG_ANDROID, getIP(context), Constant.deviceSN, powerValue);
+        if (EasySocket.getInstance().getDefconnection() != null) {
+            int localPort = EasySocket.getInstance().getDefconnection().getLocalPort();
+            Log.d(TAG, "localPort = " + localPort);
+            messageData.localPort = localPort;
+        }
         return messageData;
     }
 
@@ -73,6 +85,11 @@ public class Utils {
 
     public static MessageData getCommonMessageData(Context context) {
         MessageData messageData = new MessageData(MessageData.TAG_ANDROID, getIP(context), Constant.deviceSN);
+        if (EasySocket.getInstance().getDefconnection() != null) {
+            int localPort = EasySocket.getInstance().getDefconnection().getLocalPort();
+            Log.d(TAG, "localPort = " + localPort);
+            messageData.localPort = localPort;
+        }
         return messageData;
     }
 
@@ -298,5 +315,45 @@ public class Utils {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void keepServiceAlive() {
+        if (ToBServiceHelper.getInstance().getServiceBinder() == null) {
+            return;
+        }
+        String pkgName = BuildConfig.APPLICATION_ID;
+        try {
+            Log.d(TAG, "keepServiceAlive pkgName = " + pkgName);
+            ToBServiceHelper.getInstance().getServiceBinder().pbsAppKeepAlive(pkgName, true, 0);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static String getDeviceSN() {
+        String deviceSN = "";
+        if (ToBServiceHelper.getInstance().getServiceBinder() != null) {
+            try {
+                deviceSN = ToBServiceHelper.getInstance().getServiceBinder().pbsStateGetDeviceInfo(PBS_SystemInfoEnum.EQUIPMENT_SN, 0);
+                Log.d(TAG, "getDeviceSN deviceSN = " + deviceSN);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+        return deviceSN;
+    }
+
+    public static int getPicoPower() {
+        int powerValue = 0;
+        if (ToBServiceHelper.getInstance().getServiceBinder() != null) {
+            try {
+                String powerStr = ToBServiceHelper.getInstance().getServiceBinder().pbsStateGetDeviceInfo(PBS_SystemInfoEnum.ELECTRIC_QUANTITY, 0);
+                Log.d(TAG, "getPicoPower powerStr = " + powerStr);
+                powerValue = Integer.parseInt(powerStr);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+        return powerValue;
     }
 }

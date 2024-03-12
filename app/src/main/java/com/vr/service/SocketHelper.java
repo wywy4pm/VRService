@@ -59,7 +59,8 @@ public class SocketHelper {
         public void onSocketConnSuccess(SocketAddress socketAddress) {
             super.onSocketConnSuccess(socketAddress);
             Log.d(TAG, "onSocketConnSuccess");
-            MessageData messageData = Utils.getCommonMessageData(context);
+            int power = Utils.getPicoPower();
+            MessageData messageData = Utils.getMessageData(context, power);
             sendMessage(messageData);
         }
 

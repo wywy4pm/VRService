@@ -58,8 +58,8 @@ public class Utils {
         return bitmap;
     }
 
-    public static MessageData getMessageData(Context context, String rtmpUrl, String normalUrl) {
-        MessageData messageData = new MessageData(MessageData.TAG_ANDROID, getIP(context), Constant.deviceSN, rtmpUrl, normalUrl);
+    public static MessageData getMessageData(Context context, String rtmpUrl, String normalUrl, String noConfirmUrl) {
+        MessageData messageData = new MessageData(MessageData.TAG_ANDROID, getIP(context), Constant.deviceSN, rtmpUrl, normalUrl, noConfirmUrl);
         if (EasySocket.getInstance().getDefconnection() != null) {
             int localPort = EasySocket.getInstance().getDefconnection().getLocalPort();
             Log.d(TAG, "localPort = " + localPort);

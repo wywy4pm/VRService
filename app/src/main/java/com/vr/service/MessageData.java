@@ -15,6 +15,7 @@ public class MessageData {
     public String imageBase64Data;
     public String rtmpUrl;
     public String normalUrl;
+    public String noConfirmUrl;
     public int volumeIndex;
     public int powerValue;
     public int localPort;
@@ -33,12 +34,13 @@ public class MessageData {
         DevSN = devSN;
     }
 
-    public MessageData(String tag, String IP, String devSN, String rtmpUrl, String normalUrl) {
+    public MessageData(String tag, String IP, String devSN, String rtmpUrl, String normalUrl, String noConfirmUrl) {
         Tag = tag;
         this.IP = IP;
         DevSN = devSN;
         this.rtmpUrl = rtmpUrl;
         this.normalUrl = normalUrl;
+        this.noConfirmUrl = noConfirmUrl;
     }
 
     public MessageData(String tag, String IP, String devSN, int powerValue) {

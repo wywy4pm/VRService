@@ -29,7 +29,10 @@ import androidx.annotation.Nullable;
 
 import com.google.gson.GsonBuilder;
 import com.pvr.tobservice.ToBServiceHelper;
+import com.pvr.tobservice.enums.PBS_PICOCastOptionOrStatusEnum;
+import com.pvr.tobservice.enums.PBS_PICOCastOptionValueEnum;
 import com.pvr.tobservice.enums.PBS_PICOCastUrlTypeEnum;
+import com.pvr.tobservice.enums.PBS_ScreencastAudioOutputEnum;
 import com.pvr.tobservice.interfaces.IIntCallback;
 
 import java.nio.ByteBuffer;
@@ -256,6 +259,13 @@ public class VRService extends Service implements UdpHelper.UdpListener, SocketL
                 return;
             }
             try {
+                //开始设置参数时，扩展位传2，停止投屏服务
+                ToBServiceHelper.getInstance().getServiceBinder().pbsPicoCastSetOption(PBS_PICOCastOptionOrStatusEnum.OPTION_RESOLUTION_LEVEL, PBS_PICOCastOptionValueEnum.OPTION_VALUE_RESOLUTION_HIGH_4K, 2);
+                ToBServiceHelper.getInstance().getServiceBinder().pbsPicoCastSetOption(PBS_PICOCastOptionOrStatusEnum.OPTION_BITRATE_LEVEL, PBS_PICOCastOptionValueEnum.OPTION_VALUE_BITRATE_HIGH, 0);
+                //结束设置参数时，扩展位传1，启动投屏服务
+                ToBServiceHelper.getInstance().getServiceBinder().pbsPicoCastSetOption(PBS_PICOCastOptionOrStatusEnum.OPTION_AUDIO_ENABLE, PBS_PICOCastOptionValueEnum.OPTION_VALUE_AUDIO_ON, 1);
+
+                ToBServiceHelper.getInstance().getServiceBinder().pbsSetScreenCastAudioOutput(PBS_ScreencastAudioOutputEnum.AUDIO_SINK_TARGET,0);
                 int result = ToBServiceHelper.getInstance().getServiceBinder().pbsPicoCastInit(new IIntCallback() {
                     @Override
                     public void callback(int result) throws RemoteException {
@@ -272,9 +282,12 @@ public class VRService extends Service implements UdpHelper.UdpListener, SocketL
                 Log.d(TAG,"startScreen pbsPicoCastSetShowAuthorization authorization = " + authorization);
                 String rtmpUrl = ToBServiceHelper.getInstance().getServiceBinder().pbsPicoCastGetUrl(PBS_PICOCastUrlTypeEnum.RTMP_URL, 0);
                 String normalUrl = ToBServiceHelper.getInstance().getServiceBinder().pbsPicoCastGetUrl(PBS_PICOCastUrlTypeEnum.NORMAL_URL, 0);
+                String noConfirmUrl = ToBServiceHelper.getInstance().getServiceBinder().pbsPicoCastGetUrl(PBS_PICOCastUrlTypeEnum.NO_CONFIRM_URL, 0);
                 Log.d(TAG, "startScreen pbsPicoCastGetUrl rtmpUrl = " + rtmpUrl);
                 Log.d(TAG, "startScreen pbsPicoCastGetUrl normalUrl = " + normalUrl);
-                MessageData messageData = Utils.getMessageData(this, rtmpUrl, normalUrl);
+                Log.d(TAG, "startScreen pbsPicoCastGetUrl noConfirmUrl = " + noConfirmUrl);
+
+                MessageData messageData = Utils.getMessageData(this, rtmpUrl, normalUrl, noConfirmUrl);
                 if (socketHelper != null) {
                     socketHelper.sendMessage(messageData);
                 }
